@@ -1,0 +1,50 @@
+footer{
+	padding-left: 240px;
+}
+
+
+.main {
+	margin: 1% 0;
+}
+
+.tabs .tab a {
+	color: white;
+}
+
+.tabs .tab a:hover {
+	color: #FFB74D;
+}
+
+.grade {
+	color: gray;
+}
+
+.grade:hover {
+	color: #ef5350;
+}
+
+
+#login_modal, #signup_modal {
+	border-radius: 3em;
+}
+
+#profile-picture {
+	margin-top: -4em;
+	position: relative;
+}
+
+#tab_active {
+	display: none;
+}
+
+#float-button {
+	bottom: 45px;
+	right: 24px;
+}
+
+@media only screen and (max-width : 992px) {
+	header, footer {
+  		padding-left: 0;
+	}
+}
+    

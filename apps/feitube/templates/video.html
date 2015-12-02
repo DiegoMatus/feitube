@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static from static %}
+
+{% block content %}
+<div id="fb-root"></div>
+<script>
+	(function(d, s, id) {
+	var js, fjs = d.getElementsByTagName(s)[0];
+	if (d.getElementById(id)) return;
+	js = d.createElement(s); js.id = id;
+	js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5&appId=615732791843545";
+	fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));
+</script>
+
+	{% if user.is_authenticated %}
+	<div id="float-button" class="fixed-action-btn horizontal click-to-toggle">
+		<a class="btn-floating btn-large red">
+			<i class="fa fa-share-alt"></i>
+		</a>
+		<ul>
+			<li><div class="fb-share-button" data-href="https://feitube.herokuapp.com/watch/{{ video.slug }}/" data-layout="icon"></div></li>
+			<li><a class="btn-floating blue accent-3"><i class="fa fa-facebook"></i></a></li>
+			<li><a class="btn-floating grey"><i class="fa fa-instagram"></i></a></li>
+			<li><a class="btn-floating red"><i class="fa fa-google"></i></a></li>
+			<li><a class="btn-floating blue"><i class="fa fa-twitter"></i></a></li>
+		</ul>
+	</div>
+	{% endif %}
+
+	<div class="col s12 m7 offset-m1 l5 offset-l3">
+		<div id="video-container" name="{{ video.slug }}" class="flowplayer row">
+			<video id="my-video" height="320px" width="auto" class="col s12" preload="auto">
+				<source src="{{ video.generic_path }}.mp4" type='video/mp4'>
+				<source src="{{ video.generic_path }}.webm" type='video/webm'>
+				<source src="{{ video.generic_path }}.ogv" type='video/ogg'>
+			</video>
+		</div>
+		<div class="row orange lighten-2">
+			<h5 class="col s12 grey-text text-darken-4">{{ video.title }}</h5>
+			<div class="col s12">
+				<div class="row grey-text text-lighten-4">
+              		{% if user.profile.profile_picture %}
+						<img class="col s4 m2" src="{{ video.profile.profile_picture.url }}" alt="">
+              		{% else %}
+						<img class="col s4 m2" src="{% static "img/20.png" %}" alt="">
+              		{% endif %}  	
+					<div class="col s8 m10">
+						<div class="row">
+							<p class="col s6">Por <a class="grey-text text-darken-2" href="{% url "index" %}" id="profile">{{ video.profile.user.get_username }}</a></p>
+							{% if video.views == 1 %}
+								<p class="col s6">{{ video.views }} Visita</p>
+							{% else %}
+								<p class="col s6">{{ video.views }} Visitas</p>
+							{% endif %}
+						</div>						
+						<div class="row">
+							<div class="col s6 l4">
+								<p>{{ video.uploaded|date:"d M Y" }}</p>
+							</div>
+							<div class="col s6 l3">
+								<p id="rate_average" class="red-text">Score: {{ rate_average|floatformat }}</p>
+							</div>
+							<div class="col s8 m5">	
+							{% if user.is_authenticated %}
+								<div class="row">
+									<a id="one" class="grade col s1" href="{% url "rate" %}"><span>1</span><i class="material-icons">grade</i></a>
+									<a id="two" class="grade col s1" href="{% url "rate" %}"><span>2</span><i class="material-icons">grade</i></a>
+									<a id="three" class="grade col s1" href="{% url "rate" %}"><span>3</span><i class="material-icons">grade</i></a>
+									<a id="four" class="grade col s1" href="{% url "rate" %}"><span>4</span><i class="material-icons">grade</i></a>
+									<a id="five" class="grade col s1" href="{% url "rate" %}"><span>5</span><i class="material-icons">grade</i></a>
+								</div>
+							{% endif %}
+							</div>
+							<div class="col s4 m2">
+								<a id="embed_code" class="btn" >Embed</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>	
+		<div class="divider"></div>
+		<div class="row orange lighten-2">
+			<div class="col s12">
+				<p class="col s12">Tags: {{ video.tags}}</p>
+				<p class="col s12">Descripción: {{ video.description }}</p>
+			</div>
+		</div>			
+		<div class="row section orange lighten-2">
+		    <form id="comment_form" class="col s12" method="POST">{% csrf_token %}
+				<div class="row"> 
+					{% if user.is_authenticated %}
+              		{% if user.profile.profile_picture %}
+						<img id="user_picture" class="col s2 responsive-img circle" src="{{ user.profile.profile_picture.url }}" alt="{{ user.get_username }}"> 
+              		{% else %}
+						<img id="user_picture" class="col s2 responsive-img circle" src="{% static "img/20.png" %}" alt="{{ user.get_username }}">
+              		{% endif %}  	
+						<div class="input-field col s10">
+						  <textarea required id="comment_body" name="comment_body" class="validate materialize-textarea formValidation"></textarea>
+						  <label for="textarea1">Comment</label>
+						</div>
+						<div class="row right">
+							<div class="col s2">
+							  <button class="btn waves-effect waves-light" type="submit" name="action">Publicar
+							    <i class="material-icons right">send</i>
+							  </button>
+							</div>
+						</div>
+					{% else %}
+						<img class="col s2 responsive-img circle" src="{% static "img/20.png" %}" alt="ggg">   	
+						<div class="input-field col s10">
+						  <textarea disabled class="materialize-textarea"></textarea>
+						  <label for="textarea2">Login for comment</label>
+						</div>
+					{% endif %}
+				</div>
+		    </form>
+		</div>
+		<div class="divider"></div>
+		<div class="row orange lighten-2">
+			<ul id="messages" class="col s12">
+			{% for comment in comments %}
+				<div class="divider"></div>
+				<li class="row section">	
+				{% if comment.profile.profile_picture %}				
+					<img class="col s4 m2 responsive-img circle" src="{{ comment.profile.profile_picture.url }}" alt="picture">
+				{% else %}
+					<img class="col s4 m2 responsive-img circle" src="{% static "img/20.png" %}" alt="picture">
+				{% endif %}
+					<div class="col s8 m10">
+						<div class="row">
+							<p class="col s12 m4">{{ comment.profile.user.get_username }}</p>
+							<p class="col s12 m8">Publicado el {{ comment.published|date:"d M Y" }}</p>
+						</div>
+					</div>
+					<blockquote class="comment col s12">
+						{{ comment.comment }}
+					</blockquote>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+	</div>
+{% endblock %}

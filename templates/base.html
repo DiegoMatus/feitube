@@ -1,0 +1,245 @@
+{% load static from static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" type="text/css" href="{% static "css/materialize.min.css" %}" media="screen,projection"/>
+    <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}" media="screen,projection"/>
+    <link rel="stylesheet" href="//releases.flowplayer.org/6.0.4/skin/minimalist.css">
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    {% block style %}{% endblock %}
+    <title>{% block title %}FEITUBE{% endblock %}</title>
+  </head>
+
+  <body>
+    <header id="header">
+      <section class="navbar-fixed">
+        <nav>
+          <div class="nav-wrapper orange lighten-2">
+            <a href="#" class="hide-on-med-and-down grey-text text-darken-2 brand-logo">Feitube</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse hide-on-large-only"><i class="mdi-navigation-menu"></i></a>
+            <ul class="right">
+              <li>
+                <form method="POST" action="{% url "search" %}" id="search_form">{% csrf_token %}
+                  <div class="search-wrapper input-field">
+                    <input id="search" name="search" type="search" required>
+                    <label for="search"><i class="material-icons">search</i></label>
+                    <i class="material-icons">close</i>
+                  </div>
+                </form>
+              </li>
+              {% if user.is_authenticated %}
+                <li class="hide-on-small-only"><a class="upload" href="{% url "channel" user.get_username 'upload' %}"><i class="material-icons right">trending_up</i>Upload</a></li>
+                <li class="hide-on-small-only"><a href="/"><i class="material-icons">new_releases</i></a></li>
+                <li class="hide-on-small-only"><a href="{% url "channel" user.get_username 'profile' %}"><i class="material-icons">perm_identity</i></a></li>
+              {% else %}
+                <li class="hide-on-small-only"><a class="modal-trigger" href="#login_modal"><i class="material-icons right">perm_identity</i>Login</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+      </section>
+    </header><!-- /header -->
+
+  <!-- Login Modal -->
+  <div id="login_modal" class="modal grey darken-2">
+    <div class="modal-content orange-text text-lighten-1">
+        <h4>Login</h4>
+        <p>Ingresa tus datos</p>
+        <div class="divider"></div>
+    </div>
+    <div class="row">
+      <form class="col s12" action="{% url "login" %}" method="POST" >{% csrf_token %}
+        <div class="row">
+          <div class="input-field col s6">
+            <input name="username" type="text" class="validate" required>
+            <label for="Username">Username</label>
+          </div>
+          <div class="input-field col s6">
+            <input name="password" type="password" class="validate" required>
+            <label for="password">Password</label>
+          </div>
+        </div>
+        <div class="modal-footer grey darken-2">
+          <button class="modal-action modal-close btn btn waves-effect waves-light" type="submit" >Aceptar
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div id="signup_modal" class="modal grey darken-2">
+    <div class="modal-content">
+      <h4 class="orange-text text-lighten-1">SignUp</h4>
+      <div class="divider"></div>
+    </div>
+  <div class="row">
+    <form class="col s12" method="POST" action="{% url "signup" %}" enctype="multipart/form-data">{% csrf_token %}
+      <div class="row">
+        <div class="input-field col s12 m6">
+          <input id="first_name" name="first_name" type="text" class="validate formValidation" required>
+          <label for="first_name">First Name</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="last_name" name="last_name" type="text" class="validate formValidation" required>
+          <label for="last_name">Last Name</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12 m6">
+          <input id="username" name="username" type="text" class="validate formValidation" required>
+          <label for="disabled">Username</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="email" name="email" type="email" class="validate" required>
+          <label for="email">Email</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12 m6">
+          <input id="password" name="password" type="password" class="validate" required>
+          <label for="password">Password</label>
+        </div>
+        <div class="input-field col s12 m6">
+          <input id="password2" name="password2" type="password" class="validate" required>
+          <label for="password2">Confirm Password</label>
+        </div>
+      </div>
+      <div class="row modal-footer grey darken-2">
+        <div class="col s9 file-field input-field grey darken-2">
+          <div class="btn">
+            <span>Profile picture</span>
+            <input id="profile_picture_path" type="file" name="profile_picture">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text">
+          </div>
+        </div>   
+        <button class="col s3 modal-action modal-close btn waves-effect waves-light" type="submit" >Register<i class="material-icons right">send</i>
+        </button>
+      </div>
+    </form>
+  </div>
+  </div>
+
+    <aside id="sidebar">
+      <ul class="side-nav fixed grey darken-2" id="mobile-demo">
+        <li class="orange lighten-2"><a href="{% url "index" %}" class="grey-text text-darken-2">Feitube</a></li>
+        <div class="sidebar-header">
+          {% if user.is_authenticated %}
+            <figure class="sidebar-image">
+                {% if user.profile.profile_picture %}  
+                  <img src="{{ user.profile.profile_picture.url }}" alt="profile_image" class="circle responsive-img"/>
+                {% else %}
+                  <img src="{% static "img/20.png" %}" alt="profile_image" class="circle responsive-img"/>
+                {% endif %}
+                  <figcaption><a href="{% url "channel" user.get_username 'profile' %}" class="orange-text text-lighten-2 center-align">{{ user.get_username }}</a></figcaption>
+            </figure>
+            <div class="row network">
+                <div class="col s3"><a class="white-text" href="{{ user.profile.twitter }}"><i class="fa fa-twitter fa-lg"></i></a></div>
+                <div class="col s3"><a class="white-text" href="{{ user.profile.facebook }}"><i class="fa fa-facebook fa-lg"></i></a></div>
+                <div class="col s3"><a class="white-text" href="{{ user.profile.instagram }}"><i class="fa fa-instagram fa-lg"></i></a></div>
+                <div class="col s3"><a class="white-text" href="{{ user.profile.google }}"><i class="fa fa-google-plus fa-lg"></i></a></div>
+            </div>
+            <li>
+              <a href="{% url "index" %}" class="white-text">
+                <i class="material-icons">send</i> Home
+              </a>
+            </li>
+            <li>
+              <a href="{% url "channel" user.get_username 'upload' %}" class="green-text text-lighten-2">
+                <i class="material-icons">send</i> Upload
+              </a>
+            </li>
+            <li>
+              <a href="{% url "channel" user.get_username 'videos' %}" class="orange-text text-lighten-2">
+                <i class="material-icons">send</i> My videos
+              </a>
+            </li>
+            <li>
+              <a href="{% url "channel" user.get_username 'favs' %}" class="red-text text-lighten-2">
+                <i class="material-icons">send</i> Scores
+              </a>
+            </li>
+            <li>
+              <a href="{% url "channel" user.get_username 'playlists' %}" class="blue-text text-lighten-2">
+                <i class="material-icons">send</i> Playlist
+              </a>
+            </li>
+            <li>
+              <a href="{% url "channel" user.get_username 'stream' %}" class="white-text">
+                <i class="material-icons">send</i> Stream
+              </a>
+            </li>
+            <li>
+              <a href="{% url "logout" %}" class="red-text text-lighten-2">
+                <i class="material-icons">send</i> Logout
+              </a>
+            </li>
+          {% else %}
+            <figure class="sidebar-image">
+                  <img src="static/img/20.png" alt="" class="circle responsive-img"/>
+                  <figcaption><a href="#" class="orange-text text-lighten-2 center-align">Accede ahora</a></figcaption>
+            </figure>
+            <div class="row">
+              <a class="modal-trigger waves-effect waves-light btn col s4 offset-s2" href="#signup_modal" >Signup</a>
+              <a href="#login_modal" class="modal-trigger waves-effect waves-light btn col s4 offset-s1" >Login</a>
+            </div>
+            <li><a href="{% url "index" %}" class="white-text">Home</a></li>
+          {% endif %}
+        </div>
+      </ul>
+    </aside>
+
+  <section class="main row section">       
+    {% block content %}{% endblock %}
+    <aside class="col s12 m4 l4">
+      <a class="twitter-timeline"  href="https://twitter.com/hashtag/DevAplicacionesEnRed" data-widget-id="669795053980639232">#DevAplicacionesEnRed Tweets</a>
+    </aside>
+  </section>
+
+  <footer class="page-footer orange lighten-2">
+    <div class="container">
+      <div class="row">
+        <div class="col l6 s12">
+          <h5 class="grey-text text-darken-3">Feitube</h5>
+          <p class="grey-text text-darken-2">Videos sobre la Facultad de Estadística e
+          Informática, la Universidad Veracruzana y en general :)</p>
+        </div>
+        <div class="col l4 offset-l2 s12">
+          <h5 class="grey-text text-darken-3">Menú</h5>
+          <ul>
+            <li><a class="grey-text text-darken-2" href="#!">Home</a></li>
+            <li><a class="grey-text text-darken-2" href="#!">Upload</a></li>
+            <li><a class="grey-text text-darken-2" href="#!">My videos</a></li>
+            <li><a class="grey-text text-darken-2" href="#!">Scores</a></li>
+            <li><a class="grey-text text-darken-2" href="#!">Playlist</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container grey-text text-darken-2">
+      © 2015 Copyright
+      <a class="grey-text text-darken-2 right" href="#!">Diego Matus Perdomo</a>
+      </div>
+    </div>
+  </footer>
+
+    <!--Import jQuery before materialize.js-->
+    <script src="{% static "js/jquery-2.1.1.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/materialize.min.js" %}" type="text/javascript"></script>
+    <script src="http://localhost:9998/socket.io/socket.io.js"></script>
+    <script src="//releases.flowplayer.org/6.0.4/flowplayer.min.js"></script>
+    <script src="{% static "js/scripts.js" %}" type="text/javascript"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
